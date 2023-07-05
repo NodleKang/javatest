@@ -1,0 +1,7 @@
+C:\> SP_TEST
+Proxy-1
+Service Init.
+
+C:\> SP_TEST
+Proxy-2
+Auth Check.

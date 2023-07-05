@@ -1,0 +1,7 @@
+C:\> SP_TEST
+Proxy-1 /auth
+Auth Check.
+
+C:\> SP_TEST
+Proxy-2 /notice
+Notice Announced.
