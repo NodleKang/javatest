@@ -1,0 +1,54 @@
+※ HTTP 기반 Messaging Service
+- HTTP 요청에 대해 Messaging Service는 *즉시 응답*해야 하며 대기하지 않아야 함
+- 모든 HTTP 요청은 요청 받은 순서대로 처리
+- ‘Producer’와 ‘Consumer’의 역할을 제공프로그램이 수행 (‘※ 제공프로그램 (MOCK.EXE)’ 참조)
+
+※ Queue 생성
+- URI : POST http://127.0.0.1:8080/CREATE/<Queue Name>
+- 요청 Body : JSON 문자열 형식, { “QueueSize” : <Queue Size>}
+- 동작 : <Queue Name>의 Queue를 최대 <Queue Size>개의 Message를 저장할 수 있도록 생성
+- 응답 Body : JSON 문자열 형식
+  1) <Queue Name>의 Queue가 이미 존재하는 경우 {“Result”: ”Queue Exist”}
+  2) 정상적으로 생성한 경우 {“Result”: ”Ok”}
+
+※ Message 송신
+- URI : POST http://127.0.0.1:8080/SEND/<Queue Name>
+- 요청 Body : JSON 문자열 형식, { “Message” : “<Message>” }
+- 동작 : <Message>를 <Queue Name>의 Queue에 저장
+- 응답 Body : JSON 문자열 형식
+  1) <Queue Name>의 Queue가 <Queue Size>개의 Message를 저장한 경우 {“Result”: ”Queue Full”}
+  3) 정상적으로 Queue에 저장한 경우 {“Result”: ”Ok”}
+
+※ Message 수신
+- URI : GET http://127.0.0.1:8080/RECEIVE/<Queue Name>
+- 동작 :
+  1) <Queue Name>의 Queue에 저장된 수신 가능한 Message 중 가장 먼저 저장된 Message 하나를 응답
+  2) 수신된 Message는 Queue에서 삭제되지 않지만, 다른 Consumer가 수신할 수 없음
+  3) 각 Message를 식별할 수 있도록 고유의 <Message ID> 값을 응답에 포함
+- 응답 Body : JSON 문자열 형식
+  1) 응답할 Message가 존재할 경우, Message의 Message ID와 Message를 응답 {“Result”: ”Ok”, “MessageID”: “<Message ID>”, “Message”: “<Message>”}
+  2) 응답할 Message가 없는 경우 {“Result”: ”No Message”}
+
+※ Message 핸들링 완료
+- URI : POST http://127.0.0.1:8080/ACK/<Queue Name>/<Message ID>
+- 설명 : Consumer에서 ‘Message 핸들링’이 정상적으로 완료되었음을 알림
+- 동작 : <Message ID>의 Message 를 <Queue Name>의 Queue에서 삭제
+- 응답 Body : {“Result”: ”Ok”}
+
+※ Message 핸들링 실패
+- URI : POST http://127.0.0.1:8080/FAIL/<Queue Name>/<Message ID>
+- 설명 : Consumer에서 ‘Message 핸들링’에 실패하였음을 알림
+- 동작 : <Message ID>의 Message를 다른 Consumer가 수신할 수 있도록 복원.
+  단, 복원된 Message는 Queue에 저장된 기존의 순서가 유지되어야 함
+  ex) [ M1, M2, M3 ]가 저장된 Queue에서 M1, M2가 수신된 후, M1이 핸들링 실패할 경우, 다음
+  Consumer는 M3가 아닌 M1을 먼저 수신하게 됨
+- 응답 Body : {“Result”: ”Ok”}
+
+※ 제공프로그램(MOCK.EXE)
+- MOCK.EXE를 콘솔에서 실행하면 테스트 시나리오에 따라 Messaging Service의 기능을 순차적으로 테스트함
+- MOCK.EXE는 자가 검수의 기능도 수행하며, 모든 테스트 시나리오 성공 시 다음의 문구가 콘솔에 출력
+```
+C:\>MOCK.EXE<엔터키>     <- 제공프로그램 실행
+    …                   <- 테스트 시나리오에 따른 테스트 실행
+    테스트에 성공했습니다! <- 소문항의 모든 테스트시나리오 성공
+```

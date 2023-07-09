@@ -1,0 +1,60 @@
+아래사항을 추가로 반영한 Message Service를 구현하시오
+
+- Queue 생성 변경 (‘※ Queue 생성’ 참조)
+- Queue에 Process Timeout 속성 추가 (‘※ Process Timeout 시간 초과’ 참조)
+- Dead Letter Queue 및 Dead Letter Queue 수신 추가
+  (‘※ Dead Letter Queue’, ‘※ Dead Letter Queue 수신‘ 참조)
+- Message 수신 대기 기능 추가 (‘※ Message 수신 대기’ 참조)
+
+----------
+
+※ Queue 생성
+- URI : POST http://127.0.0.1:8080/CREATE/<Queue Name>
+- 요청 Body : JSON 문자열 형식
+```
+  {
+  “QueueSize”: <Queue Size>
+  “ProcessTimeout”: <Process Timeout>
+  “MaxFailCount”: <Max Fail Count>
+  “WaitTime”: <Wait Time>
+  }
+```
+- 동작 :
+  1) 요청된 속성에 따라 Queue 생성
+  2) <Queue Size> 속성에 따른 동작은 변경 없음
+  3) <Process Timeout> 속성에 따른 동작은 ‘※ Process Timeout 시간 초과’ 참조
+  4) <Max Fail Count> 속성에 따른 동작은 ‘※ Dead Letter Queue’ 참조
+  5) <Wait Time> 속성에 따른 동작은 ‘※ Message 수신 대기’ 참조
+- 응답 Body : JSON 문자열 형식
+  1) <Queue Name>의 Queue가 이미 존재하는 경우 {“Result”: ”Queue Exist”}
+  2) 정상적으로 생성한 경우 {“Result”: ”Ok”}
+
+※ Process Timeout 시간 초과
+- <Process Timeout> 속성의 값이 0 보다 클 경우에 동작 (0일 경우에는 Timeout 없음)
+- Consumer가 Queue에서 Message를 수신한 후 <Process Timeout>초 이내에 ‘Message 핸들링
+  완료’ 또는 ‘Message 핸들링 실패’ 요청이 없는 경우
+- Message를 다른 Consumer가 수신 가능 하도록 복원 (즉, Message 핸들링 실패로 간주)
+- 단, 복원된 Message는 Queue에 저장된 기존의 순서가 유지되어야 함 (Message 핸들링 실패와
+  동일 조건)
+
+※ Dead Letter Queue
+- Message 핸들링에 여러 번 실패한 Message(Dead Letter)를 보관하는 Queue
+- 수신한 Message에 대해 ‘Message 핸들링 실패’ 또는 ‘Process Timeout 시간 초과’가 발생한 횟수가
+  <Max Fail Count> 속성 값을 초과한 경우, 해당 Message를 복원하지 않고 Dead Letter Queue로
+  이동
+
+※ Dead Letter Queue 수신
+- URI : GET http://127.0.0.1:8080/DLQ/<Queue Name>
+- 동작 : <Queue Name>의 Dead Letter Queue에 저장된 Message중 가장 먼저 저장된 Message
+  하나를 응답하고 해당 Message를 삭제
+- 응답 Body :
+  1) 응답할 Message가 존재할 경우
+    - ```{“Result”: ”Ok”, “MessageID”: “<Message ID>”, “Message”: ”<Message>”}```
+  2) 응답할 Message가 없는 경우 {“Result”: ”No Message”}
+
+※ Message 수신 대기
+- <Wait Time> 속성의 값이 0 보다 클 경우에 ‘Message 수신’ 요청에서 동작 (0일 경우에는 즉시 응답)
+- Consumer의 ‘Message 수신’ 요청 시 Queue에 Message가 없는 경우 최대 <Wait Time> 초 동안
+  수신 대기하며, Message가 송신되거나 복원되는 즉시 해당 Message를 대기중인 Consumer에게 응답
+- <Wait Time> 초 동안 응답할 Message가 없는 경우, 대기중인 Consumer에게 {“Result”: ”No Message”} 를 응답
+- 복수의 Consumer가 ‘Message 수신 대기’ 하는 경우에는 먼저 대기한 Consumer에게 우선 응답

@@ -1,0 +1,36 @@
+※ Queue 생성
+- 콘솔 입력 명령어 형식 : CREATE <Queue Name> <Queue Size>
+- 동작 : <Queue Name>의 Queue를 최대 <Queue Size>개의 Message를 저장할 수 있도록 생성
+- 콘솔 출력 : <Queue Name>의 Queue가 이미 존재하는 경우 “Queue Exist”을 출력, 정상인 경우
+  출력 없음
+
+※ Message 송신
+- 콘솔 입력 명령어 형식 : SEND <Queue Name> <Message>
+- 동작 : <Message>를 <Queue Name>의 Queue에 저장
+- 콘솔 출력 : <Queue Name>의 Queue에 <Queue Size>개의 Message가 이미 저장된 경우 “Queue
+  Full”을 출력, 정상인 경우 출력 없음.
+
+※ Message 수신
+- 콘솔 입력 명령어 형식 : RECEIVE <Queue Name>
+- 동작 : <Queue Name>의 Queue에 가장 먼저 저장된 Message 하나를 출력(수신)하고,
+ Queue에서 해당 Message를 삭제
+- 콘솔 출력 : 출력할 Message가 존재할 경우 해당 Message 출력, 없는 경우 출력 없음
+
+```
+C:\>SP_TEST<엔터키>      <- 구현한 프로그램 실행 (Argument 없음)
+CREATE PLAY 2<엔터키>    <- 콘솔 입력
+CREATE LOG 5<엔터키>     <- 콘솔 입력
+CREATE PLAY 2<엔터키>    <- 콘솔 입력
+Queue Exist             <- 콘솔 출력
+SEND PLAY HELLO<엔터키>  <- 콘솔 입력
+SEND PLAY WORLD<엔터키>  <- 콘솔 입력
+SEND PLAY LGCNS<엔터키>  <- 콘솔 입력
+Queue Full              <- 콘솔 출력
+SEND LOG START<엔터키>   <- 콘솔 입력
+RECEIVE PLAY<엔터키>     <- 콘솔 입력
+HELLO                   <- 콘솔 출력
+RECEIVE PLAY<엔터키>     <- 콘솔 입력
+WORLD                   <- 콘솔 출력
+RECEIVE LOG<엔터키>      <- 콘솔 입력
+START                   <- 콘솔 출력
+```

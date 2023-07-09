@@ -1,0 +1,16 @@
+아래사항을 추가로 반영한 Messaging Service를 구현하시오.
+
+------
+
+※ Shutdown 요청
+- URI : http://127.0.0.1:8080/SHUTDOWN
+- 동작 :
+  1) ‘Message 수신 대기’ 중인 모든 Consumer의 요청에 대해 즉시 {“Result”: ”Service Unavailable”} 을 응답
+  2) Consumer가 수신한 모든 Message는 핸들링 완료된 것으로 간주하여 Queue에서 삭제
+  3) 현재의 모든 Queue (Dead Letter Queue 포함)와 Message의 상태를 저장하고 Messaging Service 종료
+- 응답 Body : JSON 문자열
+  {“Result”: ”Ok”}
+
+※ Messaging Service 복구
+- ‘Shutdown 요청’ 으로 (‘※ Shutdown 요청’ 참조) 종료 시 저장된 Queue와 Message의 상태를
+  ‘Messaging Service’가 다시 시작될 때 Shutdown 전 상태로 복구
