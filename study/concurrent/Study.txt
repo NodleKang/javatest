@@ -1,0 +1,135 @@
+Runnable = 할 일
+Thread = 일을 하는 일꾼
+------------------------
+[ Thread를 시작하는 방법 ]
+------------------------
+
+1. Runnable 객체(스레드에서 할 작업)를 만든다.
+
+Runnable job = new MyRunnable();
+
+Runnable은 인터페이스입니다.
+Runnable 인터페이스를 구현하는 클래스를 만들어야 하며 스레드에서 처리할 작업은 그 클래스에서 정의합니다.
+즉, 새로운 스레드의 호롯 스택에서 실행할 메소드를 그 클래스에서 정의해야 합니다.
+
+2. Thread 객체(일꾼)을 만들고 그 객체에 Runnable 객체(작업)을 전달한다.
+
+Thread testThread = new Thread(job);
+
+새로운 Runnable 객체를 Thread 생성자에게 전달합니다.
+이렇게 하면 새로운 Thread 객체에서 새로운 스택 맨 밑에 넣을 메소드(Runnable 객체의 run() 메소드)를 알려줄 수 있습니다.
+
+3. Thread 객체를 시작한다.
+
+testThread.start();
+
+Thread의 start() 메소드를 호출해야지만 Thread 객체에서 새로운 실행 스레드를 만들어냅니다.
+새로운 스레드가 시작되면 Runnable 객체의 run() 메소드를 받아서 새로운 스레드의 스택 맨 아래에 집어 넣습니다.
+
+------------------------
+[ Runnable 객체란 ]
+------------------------
+스레드에서 해야 할 일을 만들려면 Runnable 인터페이스를 구현해야 합니다.
+
+class TestRunnable implements Runnable {
+    public void run() {
+        go;
+    }
+    public void go(){
+        do();
+    }
+    public void doExecute() {
+        System.out.println("top of the stack");
+    }
+}
+
+public class ThreadTester {
+    public static void main(String[] args) {
+        Runnable job = new TestRunnable();
+        Thread myThread = new Thread(job);
+
+        myThread.start();
+
+        System.out.println("back in main");
+    }
+}
+
+------------------------
+[ 새로 생성된 스레드의 상태 3가지 ]
+------------------------
+
+1. 새로운 스레드 상태
+
+Thread t = new Thread(r);
+
+Thread 인스턴스가 만들어지긴 했지만 아직 시작되지 않았습니다.
+Thread 객체만 있고 아직 실행 스레드는 없는 상황입니다.
+
+2. 실행 가능한 상태
+
+t.start();
+
+스레드가 시작하면 실행 가능한 상태(runnable state)로 들어갑니다.
+즉, 실행할 준비가 되어있고 실행 대상으로 선정되기를 기다리고 있는 상태입니다.
+이 시점에서는 이 스레드를 위한 새로운 호출 스택이 있습니다.
+
+3. 실행 중인 상태
+
+실행 대상으로 선정되었을 때
+
+이 상태가 "현재 실행중인 스레드"가 되는 것입니다. 그런 결정은 JVM 스케줄러만이 내릴 수 있습니다.
+때때로 그런 결정에 영향을 줄 수는 있지만 실행 가능한 상태의 스레드로 만들 수는 없습니다.
+실행 중인 상태에서는 그 스레드가 활성 호출 스택을 가지고 되고 그 스택의 맨 위에 있는 메소드가 실행됩니다.
+
+일단 스레드가 실행 가능한 상태에 들어가고 나면 "실행 가능한 상태"와 "실행 중인 상태",
+그리고 "일시적인 실행 불가능 상태(aka.봉쇄 상태)" 사이에서 왔다 갔다 합니다.
+
+------------------------
+[ 스레드 스케줄러 ]
+------------------------
+
+스레드 상태 변경은 모두 "스레드 스케줄러"가 결정합니다. "스레드 스케줄러"는 사용자가 마음대로 제어할 수는 없습니다.
+
+그렇다면 여러 곳에서 테스트했을 때, 동일한 결과를 출력하는 멀티 스레딩 프로그램을 만들려면 어떻게 해야 할까요?
+다른 건 안 되지만, 스레드의 sleep() 메소드를 사용하면
+대기 중인 스레드가 대기 시간이 종료되기 전까지는 절대 현재 실행중인 스레드가 되지 않게 할 수 있습니다.
+
+------------------------
+[ 스레드의 sleep ]
+------------------------
+
+1. sleep()
+
+스레드들이 공평하게 순번을 할당받게 하는 가장 좋은 방법은 주기적으로 대기 상태에 집어 넣어주는 것입니다.
+대기 상태에 넣어주고 싶다면 sleep() 메소드를 호출하면 됩니다.
+
+스레드에 지정된 시간이 지나면 스레드의 실행 여부는 스레드 스케줄러에게 맡겨지게 됩니다.
+
+
+class TestRunnable implements Runnable {
+    public void run() {
+        go;
+    }
+    public void go(){
+        try {
+            Thread.sleep(2000); // 스레드를 2초간 대기 상태로 만들어 main 스레드가 먼저 실행되는 걸 보장하게 만든다
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        do();
+    }
+    public void doExecute() {
+        System.out.println("top of the stack");
+    }
+}
+
+public class ThreadTester {
+    public static void main(String[] args) {
+        Runnable job = new TestRunnable();
+        Thread myThread = new Thread(job);
+
+        myThread.start();
+
+        System.out.println("back in main");
+    }
+}
