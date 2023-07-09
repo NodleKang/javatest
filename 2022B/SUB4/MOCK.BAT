@@ -1,4 +1,4 @@
-@echo off&setlocal
+@echo on&setlocal
 set base=%~dp0
 cd %base%
 java -jar %base%..\mock\mock_sub4.jar %1 %2 %3 %4 %5 %6 %7 %8 %9
