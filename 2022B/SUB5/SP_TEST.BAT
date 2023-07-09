@@ -1,6 +1,6 @@
-@echo off&setlocal
+@echo on&setlocal
 set base=%~dp0
-set libdir=%~dp0..\lib
+set libdir=%~dp0..\..\lib
 set classpath=%base%bin;%libdir%\*;lib\*
 cd %base%
 
