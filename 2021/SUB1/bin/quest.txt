@@ -1,0 +1,26 @@
+※ Message 송신
+- 콘솔 입력 명령어 형식 : SEND <Message>
+- 동작 : <Message>를 Queue에 저장
+- 콘솔 출력 : 없음 (빈칸/빈줄을 포함한 어떠한 출력도 하지 않음)
+
+※ Message 수신
+- 콘솔 입력 명령어 형식 : RECEIVE
+- 동작 : Queue에 가장 먼저 저장된 Message 하나를 출력(수신)하고, 해당 Message를 삭제
+- 콘솔 출력 : 출력할 Message가 존재할 경우 해당 Message 출력, 없는 경우 출력 없음
+
+※ 콘솔 입/출력
+- 입력 포맷 : Message 송신 명령어 또는 Message 수신 명령어
+- 출력 포맷 : 명령어 실행 결과
+
+```
+C:\>SP_TEST<엔터키> <- 구현한 프로그램 실행 (Argument 없음)
+SEND HELLO<엔터키>  <- 콘솔 입력
+SEND WORLD<엔터키>  <- 콘솔 입력
+RECEIVE<엔터키>     <- 콘솔 입력
+HELLO              <- 콘솔 출력
+SEND AAA<엔터키>    <- 콘솔 입력
+RECEIVE<엔터키>     <- 콘솔 입력
+WORLD              <- 콘솔 출력
+RECEIVE<엔터키>     <- 콘솔 입력
+AAA                <- 콘솔 출력
+```
