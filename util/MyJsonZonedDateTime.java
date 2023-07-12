@@ -15,7 +15,7 @@
  *  return builder;
  * }
  */
-package test.util;
+package util;
 
 import com.google.gson.*;
 
