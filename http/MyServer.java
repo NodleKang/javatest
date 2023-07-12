@@ -64,6 +64,10 @@ public class MyServer extends Thread {
         // 컨텍스트 경로 설정
         // 클래스를 기반으로 동적으로 인스턴스를 생성하여 서블릿으로 등록하는 방식
         context.addServlet(new ServletHolder(PathServlet.class), "/path/*");
+        // addFilter(): 웹 애플리케이션의 요청과 응답 사이에서 작동하여 요청을 가로채거나 응답을 수정하는 필터를 추가합니다.
+        //context.addFilter(PathFilter.class, "/path/*", null);
+        // addEventListener(): 웹 애플리케이션의 이벤트 리스너를 추가합니다.
+        //context.addEventListener(new PathListener());
 
         // 컨텍스트 경로 설정
         // 인스턴스를 생성하여 원하는 설정을 하고, 서블릿으로 등록하는 방식
