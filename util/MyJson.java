@@ -12,7 +12,7 @@ public class MyJson {
      * @param br
      * @return
      */
-    public static JsonObject convertBodyToJsonObject(BufferedReader br) {
+    public static JsonObject convertBufferedReaderToJsonObject(BufferedReader br) {
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -27,7 +27,7 @@ public class MyJson {
      * @param br
      * @return
      */
-    public static JsonArray convertBodyToJsonArray(BufferedReader br) {
+    public static JsonArray convertBufferedReaderToJsonArray(BufferedReader br) {
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
