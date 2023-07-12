@@ -152,6 +152,40 @@ public class PathServlet  extends HttpServlet {
         resp.getWriter().write(gson.toJson(obj));
     }
 
+    /**
+     * 요청 본문을 문자열로 읽어서 반환
+     * @param req
+     * @return
+     * @throws IOException
+     */
+    private String getBody(HttpServletRequest req) throws IOException {
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = req.getReader();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line);
+        }
+        String requestBody = buffer.toString();
+        return requestBody;
+    }
+
+    /**
+     * 응답 본문을 문자열로 읽어서 반환
+     * @param res
+     * @return
+     * @throws IOException
+     */
+    private String getBody(HttpServletResponse res) throws IOException {
+        StringBuilder buffer = new StringBuilder();
+        BufferedReader reader = res.getReader();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line);
+        }
+        String requestBody = buffer.toString();
+        return requestBody;
+    }
+
     /*
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
