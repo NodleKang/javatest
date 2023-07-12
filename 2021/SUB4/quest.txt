@@ -12,12 +12,12 @@
 - URI : POST http://127.0.0.1:8080/CREATE/<Queue Name>
 - 요청 Body : JSON 문자열 형식
 ```
-  {
-  “QueueSize”: <Queue Size>
-  “ProcessTimeout”: <Process Timeout>
-  “MaxFailCount”: <Max Fail Count>
-  “WaitTime”: <Wait Time>
-  }
+{
+"QueueSize": <Queue Size>
+"ProcessTimeout": <Process Timeout>
+"MaxFailCount": <Max Fail Count>
+"WaitTime": <Wait Time>
+}
 ```
 - 동작 :
   1) 요청된 속성에 따라 Queue 생성
@@ -26,8 +26,8 @@
   4) <Max Fail Count> 속성에 따른 동작은 ‘※ Dead Letter Queue’ 참조
   5) <Wait Time> 속성에 따른 동작은 ‘※ Message 수신 대기’ 참조
 - 응답 Body : JSON 문자열 형식
-  1) <Queue Name>의 Queue가 이미 존재하는 경우 {“Result”: ”Queue Exist”}
-  2) 정상적으로 생성한 경우 {“Result”: ”Ok”}
+  1) <Queue Name>의 Queue가 이미 존재하는 경우 {"Result": "Queue Exist"}
+  2) 정상적으로 생성한 경우 {"Result": "Ok"}
 
 ※ Process Timeout 시간 초과
 - <Process Timeout> 속성의 값이 0 보다 클 경우에 동작 (0일 경우에는 Timeout 없음)
@@ -49,12 +49,12 @@
   하나를 응답하고 해당 Message를 삭제
 - 응답 Body :
   1) 응답할 Message가 존재할 경우
-    - ```{“Result”: ”Ok”, “MessageID”: “<Message ID>”, “Message”: ”<Message>”}```
-  2) 응답할 Message가 없는 경우 {“Result”: ”No Message”}
+    - ```{"Result": "Ok", "MessageID": "<Message ID>", "Message": "<Message>"}```
+  2) 응답할 Message가 없는 경우 {"Result": "No Message"}
 
 ※ Message 수신 대기
 - <Wait Time> 속성의 값이 0 보다 클 경우에 ‘Message 수신’ 요청에서 동작 (0일 경우에는 즉시 응답)
 - Consumer의 ‘Message 수신’ 요청 시 Queue에 Message가 없는 경우 최대 <Wait Time> 초 동안
   수신 대기하며, Message가 송신되거나 복원되는 즉시 해당 Message를 대기중인 Consumer에게 응답
-- <Wait Time> 초 동안 응답할 Message가 없는 경우, 대기중인 Consumer에게 {“Result”: ”No Message”} 를 응답
+- <Wait Time> 초 동안 응답할 Message가 없는 경우, 대기중인 Consumer에게 {"Result": "No Message"} 를 응답
 - 복수의 Consumer가 ‘Message 수신 대기’ 하는 경우에는 먼저 대기한 Consumer에게 우선 응답

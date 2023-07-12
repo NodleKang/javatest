@@ -6,6 +6,10 @@
 java -classpath C:/workspace/javatest/bin/*;C:/workspace/javatest/lib/*;. com.test.HelloWorld
 ```
 
+## Json to java class
+
+https://jsonformatter.org/json-to-java
+
 ## eclipse 프로젝트 안에 모든 클래스 컴파일하기
 
 ![eclipse build](./resource/eclipse_build.jpg)
