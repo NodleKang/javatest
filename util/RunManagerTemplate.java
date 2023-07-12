@@ -33,7 +33,7 @@ public class RunManagerTemplate {
     public static void testOnHttp() {
         int port = 8080;
         // ΩÃ±€≈Ê ∆–≈œ Http Server Ω««‡
-        MyServer server = MyServer.getInstance(port);
+        //MyServer server = MyServer.getInstance(port);
         while (true) {
             try {
                 Thread.sleep(1000);
