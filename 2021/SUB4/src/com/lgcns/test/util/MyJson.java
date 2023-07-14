@@ -2,10 +2,36 @@ package com.lgcns.test.util;
 
 import com.google.gson.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.LinkedList;
 
 public class MyJson {
+
+    /**
+     * HttpServletRequest의 body를 JsonObject로 변환
+     */
+    public static Object convertHttpReqBodyToObject(HttpServletRequest req, Class c) throws IOException {
+        StringBuilder requestBody = new StringBuilder();
+        BufferedReader reader = req.getReader();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            requestBody.append(line);
+        }
+
+        String jsonBody = requestBody.toString();
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                //.setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .setPrettyPrinting()
+                .create();
+        Object o = gson.fromJson(jsonBody, c);
+        return o;
+    }
 
     /**
      * BufferedReader를 JsonObject로 변환
