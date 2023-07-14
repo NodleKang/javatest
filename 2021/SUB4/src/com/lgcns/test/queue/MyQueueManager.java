@@ -18,10 +18,10 @@ public class MyQueueManager {
         return instance;
     }
 
-    public boolean createQueueService(String queueName, int size, int processTimeout, int maxFailCount) {
+    public boolean createQueueService(String queueName, int size, int processTimeout, int maxFailCount, int waitTime, boolean isDLQ) {
         MyQueueService queueService = queues.get(queueName);
         if (queueService == null) {
-            queueService = new MyQueueService(queueName, size, processTimeout, maxFailCount);
+            queueService = new MyQueueService(queueName, size, processTimeout, maxFailCount, waitTime, isDLQ);
             queues.put(queueName, queueService);
         }
         return true;

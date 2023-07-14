@@ -23,7 +23,6 @@ public class PathServlet  extends HttpServlet {
         // 서블릿 초기화 시 필요한 작업이 있으면 여기서 처리합니다.
         // 이 메소드는 서블릿이 최초로 실행될 때 한 번만 실행됩니다.
         // 서블릿이 실행되는 동안 필요한 작업이 없으면 이 메소드는 비워둡니다.
-        System.out.println("init");
     }
 
     /**

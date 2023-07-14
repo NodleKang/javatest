@@ -3,7 +3,6 @@ package com.lgcns.test.servlet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.lgcns.test.handler.QueueConfig;
 import com.lgcns.test.queue.MyQueueManager;
 import com.lgcns.test.queue.MyQueueService;
 import com.lgcns.test.util.MyJson;
@@ -16,9 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 public class MyServlet  extends HttpServlet {
+
+    private int playCount = 0;
 
     /**
      * POST 요청 처리
@@ -92,10 +93,7 @@ public class MyServlet  extends HttpServlet {
     private void handleCreate(String queueName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // 요청 본문에서 큐 사이즈 추출
-        String body = readBodyAsString(req);
-        Gson gson = new GsonBuilder().serializeNulls().create();
-        QueueConfig conf = gson.fromJson(body, QueueConfig.class);
-        JsonObject jo = MyJson.convertBufferedReaderToJsonObject(req.getReader());
+        JsonQueueConfig conf = (JsonQueueConfig) MyJson.convertHttpReqBodyToObject(req, JsonQueueConfig.class);
 
         if ( MyQueueManager.getInstance().getQueueService(queueName) != null) {
             // 큐가 이미 존재하면 Queue Exist 응답
@@ -105,8 +103,22 @@ public class MyServlet  extends HttpServlet {
             return;
         } else {
             // 큐가 존재하지 않으면 큐(일반 메시지용, DLQ용) 생성
-            MyQueueManager.getInstance().createQueueService(queueName, conf.getQueueSize(), conf.getWaitTime(), conf.getMaxFailCount());
-            MyQueueManager.getInstance().createQueueService(queueName+"-DLQ", conf.getQueueSize(), conf.getWaitTime(), conf.getMaxFailCount());
+            MyQueueManager.getInstance().createQueueService(
+                    queueName,
+                    conf.getQueueSize(),
+                    conf.getProcessTimeout(),
+                    conf.getMaxFailCount(),
+                    conf.getWaitTime(),
+                    false
+            );
+            MyQueueManager.getInstance().createQueueService(
+                    queueName+"-DLQ",
+                    conf.getQueueSize(),
+                    conf.getProcessTimeout(),
+                    conf.getMaxFailCount(),
+                    conf.getWaitTime(),
+                    true
+            );
             resp.setStatus(200);
             resp.setHeader("Content-Type", "application/json");
             resp.getWriter().write("{\"Result\":\"Ok\"}");
@@ -121,7 +133,7 @@ public class MyServlet  extends HttpServlet {
     public void handleSend(String queueName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         // 요청 본문에서 메시지 추출
-        JsonObject jo = MyJson.convertBufferedReaderToJsonObject(req.getReader());
+        JsonObject jo = (JsonObject) MyJson.convertHttpReqBodyToObject(req, JsonObject.class);
         String msgBody = jo.get("Message").getAsString();
 
         // 큐에 메시지 추가
@@ -130,6 +142,8 @@ public class MyServlet  extends HttpServlet {
         resp.setStatus(200);
         resp.setHeader("Content-Type", "application/json");
         resp.getWriter().write("{\"Result\":\"" + result + "\"}");
+
+        System.out.println("[SEND] " + queueName + " : " + queueService.getQueueSize() );
         return;
 
     }
@@ -139,14 +153,31 @@ public class MyServlet  extends HttpServlet {
      */
     public void handleReceive(String queueName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
-
-        // 큐에서 메시지 추출
         MyQueueService queueService = MyQueueManager.getInstance().getQueueService(queueName);
+        queueService.processTimeoutMessages();
+        queueService.processOverFailedMessages();
         String result = queueService.popMessage();
+
+        System.out.println("[RECEIVE] " + queueName + " : " + result + " WaitTime : " + queueService.getWaitTime() + "s");
+
+        // Message 수신 대기 처리
+        long now = System.currentTimeMillis();
+        while (queueService.getWaitTime() >0 && result.contains("No Message")) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            result = queueService.popMessage();
+            if (now > System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(queueService.getWaitTime())) {
+                break;
+            }
+        }
+
         resp.setStatus(200);
         resp.setHeader("Content-Type", "application/json");
         resp.getWriter().write(result);
+
         return;
     }
 
@@ -156,12 +187,17 @@ public class MyServlet  extends HttpServlet {
     public void handleAck(String queueName, String msgId, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         MyQueueService queueService = MyQueueManager.getInstance().getQueueService(queueName);
+
         String result = queueService.removeMessage(msgId);
         resp.setStatus(200);
         resp.setHeader("Content-Type", "application/json");
         resp.getWriter().write(result);
-        return;
 
+        System.out.println("[ACK] before cleansing " + queueName + " : " + queueService.getQueueSize() );
+        queueService.processTimeoutMessages();
+        queueService.processOverFailedMessages();
+        System.out.println("[ACK] after cleansing" + queueName + " : " + queueService.getQueueSize() );
+        return;
     }
 
     /**
@@ -174,8 +210,13 @@ public class MyServlet  extends HttpServlet {
         resp.setStatus(200);
         resp.setHeader("Content-Type", "application/json");
         resp.getWriter().write(result);
-        return;
 
+        System.out.println("[FAIL] before cleansing " + queueName + " : " + queueService.getQueueSize() );
+        queueService.processTimeoutMessages();
+        queueService.processOverFailedMessages();
+        System.out.println("[FAIL] before cleansing " + queueName + " : " + queueService.getQueueSize() );
+
+        return;
     }
 
     /**
@@ -184,12 +225,13 @@ public class MyServlet  extends HttpServlet {
      */
     public void handleDLQ(String queueName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+        MyQueueService queueServiceNormal = MyQueueManager.getInstance().getQueueService(queueName);
+        queueServiceNormal.processTimeoutMessages();
+        queueServiceNormal.processOverFailedMessages();
+
         // DLQ 큐에서 메시지 추출
-        MyQueueService queueService = MyQueueManager.getInstance().getQueueService(queueName+"-DLQ");
-        String result = queueService.popMessage();
-        // 메시지 삭제
-        String msgId = MyJson.convertStringToJsonObject(result).get("MessageId").getAsString();
-        result = queueService.removeMessage(msgId);
+        MyQueueService queueServiceDLQ = MyQueueManager.getInstance().getQueueService(queueName+"-DLQ");
+        String result = queueServiceDLQ.popMessageDLQ();
         // 응답
         resp.setStatus(200);
         resp.setHeader("Content-Type", "application/json");
@@ -307,7 +349,6 @@ public class MyServlet  extends HttpServlet {
         // 서블릿 초기화 시 필요한 작업이 있으면 여기서 처리합니다.
         // 이 메소드는 서블릿이 최초로 실행될 때 한 번만 실행됩니다.
         // 서블릿이 실행되는 동안 필요한 작업이 없으면 이 메소드는 비워둡니다.
-        System.out.println("init");
     }
 
     /**
