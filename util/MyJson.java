@@ -3,11 +3,22 @@ package util;
 import com.google.gson.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
 
 public class MyJson {
+
+    /**
+     * 객체를 JSON으로 변환해서 HttpServletResponse 응답 본문에 씁니다. (객체를 JSON으로 변환하는 데 실패하면 IOException이 발생)
+     */
+    public static void writeJsonToHttpResponse(HttpServletResponse resp, Object obj) throws IOException {
+        resp.setStatus(200);
+        resp.setHeader("Content-Type", "application/json");
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        resp.getWriter().write(gson.toJson(obj));
+    }
 
     /**
      * HttpServletRequest의 body를 JsonObject로 변환
