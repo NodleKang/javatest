@@ -45,6 +45,26 @@ public class MyJson {
     }
 
     /**
+     * String을 JsonObject로 변환
+     */
+    public static Object convertStringToObject(String content, Class c) {
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                //.setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .setPrettyPrinting()
+                .create();
+        try {
+            Object o = gson.fromJson(content, c);
+            return o;
+        } catch (Exception e) {
+            System.out.println("MyJson.convertStringToObject() Exception: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * BufferedReader를 JsonObject로 변환
      * @param br
      * @return
