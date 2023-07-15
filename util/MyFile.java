@@ -256,6 +256,33 @@ public class MyFile {
     }
 
     /**
+     * 파일 내용을 모두 읽어서 String 배열로 반환 (UTF-8, euc-kr 등)
+     */
+    public static List<String> readFileToList(String fileFullPath, String encoding) {
+        // ArrayList 객체를 사용해서 파일 내용 저장
+        List<String> lines = new ArrayList<>();
+        // 파일 객체 생성
+        File file = new File(fileFullPath);
+        // 파일이 존재하고 파일인 경우에만 파일 내용 읽기
+        if (file.exists() && file.isFile()) {
+            // try-with-resources 구문 사용 (Java 7 이상)
+            // try 블록이 끝나면 자동으로 close() 메소드가 호출됨
+            // BufferedReader 객체를 사용해서 파일 내용 읽기
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    lines.add(line);
+                }
+            } catch (IOException e) {
+                // 예외 발생 시 스택 트레이스 출력
+                e.printStackTrace();
+            }
+        }
+        // ArrayList 객체를 String 배열로 변환해서 반환
+        return lines;
+    }
+
+    /**
      * 파일 내용중에 특정 키워드가 포함된 첫 번째 줄의 줄 번호 반환
      */
     public static int getLineNo(String fileFullPath, String keyword) {
