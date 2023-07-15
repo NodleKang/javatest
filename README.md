@@ -1,5 +1,11 @@
 # javatest
 
+## 참고
+
+35.216.53.239
+
+https://829525375625.signin.aws.amazon.com/console
+
 ## 커맨트 창에서 java 실행
 
 ```shell
