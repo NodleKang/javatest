@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class JettyExample {
+public class MyHandlerExample {
     public static void main(String[] args) throws Exception {
         Server server = new Server(8080); // 포트 번호는 필요에 따라 수정 가능
 
