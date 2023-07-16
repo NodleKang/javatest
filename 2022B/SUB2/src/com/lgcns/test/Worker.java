@@ -2,6 +2,8 @@ package com.lgcns.test;
 
 import java.util.List;
 
+import com.lgcns.test.util.MyString;
+
 /* ----------------------------------------------------------------------------
  * 
  * Worker.java - removeExpiredStoreItems() 구현, 그 외 변경 금지
@@ -23,7 +25,14 @@ public class Worker extends AbstractWorker {
 	 * - 입력된 Timestamp와 Store Item의 Timestamp간의 차이가 만료시간(3000)을 초과하면 Store에서 제거
 	 */
 	public void removeExpiredStoreItems(long timestamp, List<String> store) {
-		// 아래 라인을 지우고 만료된 Store Item 제거 기능을 구현하세요.
-		throw new UnsupportedOperationException("removeExpiredStoreItems()를 구현하세요.");
+		for(int i = store.size()-1; i >= 0; i--) {
+			String line = store.get(i);
+			String[] element = MyString.splitToStringArray(line, "#", true);
+			long timeout = Long.parseLong(element[0]);
+			if (timestamp - timeout > 3000) {
+				store.remove(i);
+			}
+		}
+		// throw new UnsupportedOperationException("removeExpiredStoreItems()를 구현하세요.");
 	}
 }
