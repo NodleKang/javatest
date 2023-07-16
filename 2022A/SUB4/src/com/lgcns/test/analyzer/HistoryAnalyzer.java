@@ -1,6 +1,7 @@
 package com.lgcns.test.analyzer;
 
 import com.lgcns.test.util.MyFile;
+import com.lgcns.test.util.MyString;
 
 import java.util.*;
 
@@ -30,8 +31,11 @@ public class HistoryAnalyzer {
      */
     public static ServiceNode populateTree(String requestId, List<String> lines) {
 
+        List<String> sortedLines = MyString.sortByNth(lines, 1); // N번째(0번부터 시작) 컬럼을 기준으로 정렬
+        sortedLines = MyString.reverse(sortedLines); // 가장 먼저 들어온 요청이 가장 마지막에 위치하므로 역순으로 바꾸기
+
         // 파일 내용을 파싱하여 Map으로 변환 (key는 requestId이고, value는 LogEntry의 List)
-        Map<String, LinkedList<ServiceNode>> logMap = parseLogEntries(lines);
+        Map<String, LinkedList<ServiceNode>> logMap = parseLogEntries(sortedLines);
 
         // requestId를 기준으로 ServiceNode List를 가져옴
         LinkedList<ServiceNode> flatList = logMap.get(requestId);
@@ -45,8 +49,8 @@ public class HistoryAnalyzer {
         // Flat List를 순회하며 노드를 계층적인 부모-자식 관계로 구성
         /*
          * Flat List 구조
-         * requestID,timestamp(epoch_millis),source,target,status
-         * 1000,1689405783,5001/front,8081/front,200
+         * requestID,timestamp,parent(source),child(target),status
+         * 1000,5001/front,8081/front,200
          */
         ServiceNode root = null;
         for (ServiceNode serviceNode : flatList) {
@@ -77,11 +81,11 @@ public class HistoryAnalyzer {
 
         for (String line : lines) {
             String[] parts = line.split(DELIMITER);
-            if (parts.length == 4) {
+            if (parts.length == 5) {
                 String requestId = parts[0];
-                String parentName = parts[1];
-                String childName = parts[2];
-                String status = parts[3];
+                String parentName = parts[2];
+                String childName = parts[3];
+                String status = parts[4];
 
                 ServiceNode serviceNode = new ServiceNode(parentName, childName, status);
 
