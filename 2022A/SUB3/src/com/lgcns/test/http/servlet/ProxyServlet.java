@@ -112,8 +112,6 @@ public class ProxyServlet extends HttpServlet {
      */
     private void proxyRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        Map<String, List<String>> headers = getHeaders(req, "x-");
-
         // 원본 요청을 전달할 대상 URL 설정
         String targetUrl = createTargetUrl(req);
         URL url = new URL(targetUrl);
