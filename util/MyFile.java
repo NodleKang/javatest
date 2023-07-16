@@ -1,6 +1,8 @@
 package util;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -96,7 +98,7 @@ public class MyFile {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("MyFile.createFile() : " + e.getMessage());
             }
         }
     }
@@ -114,9 +116,33 @@ public class MyFile {
     }
 
     /**
+     * 파일 내용 초기화
+     */
+    public static synchronized void cleanFile(String fileFullPath) {
+        File file = new File(fileFullPath);
+        if (file.exists()) {
+            try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
+                 FileChannel channel = raf.getChannel()) {
+                FileLock lock = channel.lock();
+                raf.setLength(0);
+                lock.release();
+            } catch (Exception e) {
+                System.out.println("MyFile.cleanFile() : " + e.getMessage());
+            }
+            /*try {
+                FileWriter fw = new FileWriter(file);
+                fw.write("");
+                fw.close();
+            } catch (IOException e) {
+                System.out.println("MyFile.cleanFile() : " + e.getMessage());
+            }*/
+        }
+    }
+
+    /**
      * 새로운 경로로 파일 이동
      */
-    public static void moveFile(String filename, String beforeFilePath, String afterFilePath) {
+    public static synchronized void moveFile(String filename, String beforeFilePath, String afterFilePath) {
 
         String filePath = afterFilePath+"/"+filename;
 
@@ -130,7 +156,7 @@ public class MyFile {
             File file = new File(beforeFilePath);
             file.renameTo(new File(afterFilePath));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("MyFile.moveFile() : " + e.getMessage());
         }
     }
 
@@ -222,7 +248,7 @@ public class MyFile {
             // 파일 내용을 모두 읽어서 String 객체로 반환
             content = readFileToString(file, "UTF-8"); // euc-kr
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            System.out.println("MyFile.readFileToString() : " + ioe.getMessage());
         }
 
         return content;
@@ -248,7 +274,7 @@ public class MyFile {
                 }
             } catch (IOException e) {
                 // 예외 발생 시 스택 트레이스 출력
-                e.printStackTrace();
+                System.out.println("MyFile.readFileToArray() : " + e.getMessage());
             }
         }
         // ArrayList 객체를 String 배열로 변환해서 반환
@@ -275,7 +301,7 @@ public class MyFile {
                 }
             } catch (IOException e) {
                 // 예외 발생 시 스택 트레이스 출력
-                e.printStackTrace();
+                System.out.println("MyFile.readFileToList() : " + e.getMessage());
             }
         }
         // ArrayList 객체를 String 배열로 변환해서 반환
@@ -299,7 +325,7 @@ public class MyFile {
                 return -1; // 특정 키워드가 포함된 라인이 없는 경우 -1 반환
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("MyFile.getLineNo() : " + e.getMessage());
         }
         return lineNo[0];
     }
@@ -314,7 +340,7 @@ public class MyFile {
                     .filter(line -> line.contains(keyword)) // 특정 키워드가 포함된 라인 필터링
                     .forEach(linesWithKeyword::add); // 필터링된 라인을 ArrayList 객체에 저장
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("MyFile.getLinesWithKeyword() : " + e.getMessage());
         }
         return linesWithKeyword.toArray(new String[0]); // ArrayList 객체를 String 배열로 변환해서 반환
     }
@@ -328,7 +354,7 @@ public class MyFile {
         try (Stream<String> lines = Files.lines(Paths.get(fileFullPath))) {
             line = lines.skip(lineNo-1).findFirst().get();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("MyFile.readNthLine() : " + e.getMessage());
         }
         return line;
     }
@@ -341,7 +367,7 @@ public class MyFile {
         try {
             lines = Files.lines(Paths.get(fileFullPath)).count();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("MyFile.getCountOfLines() : " + e.getMessage());
         }
         return lines;
     }
@@ -369,7 +395,7 @@ public class MyFile {
             try {
                 existingContent = readFileToString(new File(path), "UTF-8");
             } catch (IOException ioe) {
-                ioe.printStackTrace();
+                System.out.println("MyFile.writeToFile() : " + ioe.getMessage());
             }
         }
 
@@ -420,7 +446,7 @@ public class MyFile {
             writer.close();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("MyFile.replaceStringInFile() : " + e.getMessage());
         }
     }
 
@@ -440,7 +466,7 @@ public class MyFile {
             // ObjectOutputStream 닫기
             objectOutputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("MyFile.saveSerializeObjectToFile() : " + e.getMessage());
         }
     }
 
@@ -462,7 +488,7 @@ public class MyFile {
 
             return one;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("MyFile.deserializeObjectFromFile() : " + e.getMessage());
         }
 
         return null;
