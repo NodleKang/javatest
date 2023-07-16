@@ -139,6 +139,52 @@ public class MyString {
         return strList;
     }
 
+
+    /**
+     * 문자열 리스트를 주어진 n번째(0번부터 시작) 문자열을 기준으로 정렬해서 반환
+     * 문자열 리스트의 각 문자열은 ','로 구분된 문자열이라고 가정
+     */
+    public static LinkedList<String> sortByNth(List<String> strList, int n) {
+        LinkedList<String> sortedList = new LinkedList<String>(strList);
+
+        Collections.sort(sortedList, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                String[] parts1 = o1.split(",");
+                String[] parts2 = o2.split(",");
+                return parts1[n].compareTo(parts2[n]);
+            }
+        });
+        /*
+        // 버블 정렬
+        for (int i = 0; i < sortedList.size() - 1; i++) {
+            for (int j = 0; j < sortedList.size() - i - 1; j++) {
+                String[] parts1 = sortedList.get(j).split(",");
+                String[] parts2 = sortedList.get(j + 1).split(",");
+                String value1 = parts1[n];
+                String value2 = parts2[n];
+
+                if (value1.compareTo(value2) > 0) {
+                    // Swap elements
+                    String temp = sortedList.get(j);
+                    sortedList.set(j, sortedList.get(j + 1));
+                    sortedList.set(j + 1, temp);
+                }
+            }
+        }
+        */
+        return sortedList;
+    }
+
+    /**
+     * 문자열 리스트를 역순으로 바꿔서 반환
+     */
+    public static List<String> reverseList(List<String> strList) {
+        List<String> reversedList = new ArrayList<String>(strList);
+        Collections.reverse(reversedList);
+        return reversedList;
+    }
+
     /**
      * 문자열 배열을 문자열 리스트로 변환
      * @param strArr
